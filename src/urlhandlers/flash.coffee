@@ -1,27 +1,30 @@
 class FlashURLHandler
-    @xdr: ->
-        xdr = new XDomainRequest() if window.XDomainRequest
-        return xdr
+    @xhr: ->
+        xhr = new window.flensed.flXHR() if window.flensed && window.flensed.flXHR
+        return xhr
 
     @supported: ->
-        return !!@xdr()
+        try
+            window.flensed.flXHR.module_ready()
+            return true
+        catch
+            return false
 
     @get: (url, options, cb) ->
+        if typeof options is 'function'
+            cb = options
+            options = null
 
-        if xmlDocument = new window.ActiveXObject? "Microsoft.XMLDOM"
-          xmlDocument.async = false
-        else
-          return cb()
-
-        xdr = @xdr()
-        xdr.open('GET', url)
-        xdr.timeout = options.timeout or 0
-        xdr.withCredentials = options.withCredentials or false
-        xdr.send()
-        xdr.onprogress = ->
-
-        xdr.onload = ->
-             xmlDocument.loadXML(xdr.responseText)
-             cb(null, xmlDocument)
+        try
+            xhr = this.xhr()
+            xhr.open('GET', url)
+            xhr.timeout = options.timeout or 0
+            xhr.withCredentials = options.withCredentials or false
+            xhr.send()
+            xhr.onreadystatechange = ->
+                if xhr.readyState == 4
+                    cb(null, xhr.responseXML)
+        catch
+            cb()
 
 module.exports = FlashURLHandler

@@ -1,5 +1,6 @@
 xhr = require './urlhandlers/xmlhttprequest'
 flash = require './urlhandlers/flash'
+xdr = require './urlhandlers/xdr'
 
 class URLHandler
     @get: (url, options, cb) ->
@@ -21,6 +22,8 @@ class URLHandler
             return xhr.get(url, options, cb)
         else if flash.supported()
             return flash.get(url, options, cb)
+        else if xdr.supported()
+            return xdr.get(url, options, cb)
         else
             return cb()
 
